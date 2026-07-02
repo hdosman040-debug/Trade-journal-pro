@@ -1,0 +1,25 @@
+[build]
+  publish = "dist"
+  command = "npm run build"
+
+# Single Page Application routing rewrite rule
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Strict Security Headers & Static Asset Cache optimizations
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    # CRITICAL SECURITY HANDSHAKE FOR TELEGRAM MINI APPS:
+    # Explicitly allows our domain to load inside Telegram's native desktop & web app frames.
+    Content-Security-Policy = "frame-ancestors 'self' https://*.telegram.org https://*.web.telegram.org https://*.t.me;"
+
+# Force aggressive caching for static JavaScript, CSS, and structural assets
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
