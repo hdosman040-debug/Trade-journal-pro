@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { ErrorBoundary } from "./app/ErrorBoundary";
 import "./styles/globals.css";
 
 const rootEl = document.getElementById("root")!;
@@ -16,7 +17,9 @@ window.addEventListener("unhandledrejection", (e) => {
 try {
   ReactDOM.createRoot(rootEl).render(
     <React.StrictMode>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </React.StrictMode>
   );
 } catch (err: any) {
