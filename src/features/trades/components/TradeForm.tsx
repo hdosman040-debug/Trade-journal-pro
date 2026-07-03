@@ -35,7 +35,7 @@ export function TradeForm() {
     defaultValues: {
       direction: "LONG",
       status: "CLOSED",
-      date: getLocalDatetimeString(), // Safe local time format preventing webview sub-string crashes
+      date: getLocalDatetimeString(),
       rating: 5,
     },
   });
@@ -49,8 +49,12 @@ export function TradeForm() {
 
   // Reactively calculate projected trade performance dynamically as the user types
   useEffect(() => {
-    if (entryPrice && exitPrice && size) {
-      const result = calculateTradePnL(direction, Number(entryPrice), Number(exitPrice), Number(size));
+    const ep = Number(entryPrice);
+    const xp = Number(exitPrice);
+    const sz = Number(size);
+
+    if (!isNaN(ep) && !isNaN(xp) && !isNaN(sz) && ep > 0 && xp > 0 && sz > 0) {
+      const result = calculateTradePnL(direction, ep, xp, sz);
       setLivePnL(result);
     } else {
       setLivePnL(null);
@@ -61,17 +65,28 @@ export function TradeForm() {
     let pnl = undefined;
     let pnlPercentage = undefined;
 
-    if (data.status === "CLOSED" && data.exitPrice) {
-      const calcs = calculateTradePnL(data.direction, data.entryPrice, data.exitPrice, data.size);
+    // Strict sanitization of values to prevent NaN state propagation inside LocalStorage/Telegram
+    const entry = Number(data.entryPrice);
+    const exit = data.exitPrice ? Number(data.exitPrice) : null;
+    const sl = data.stopLoss ? Number(data.stopLoss) : null;
+    const tp = data.takeProfit ? Number(data.takeProfit) : null;
+
+    const cleanExit = exit && !isNaN(exit) ? exit : undefined;
+    const cleanSL = sl && !isNaN(sl) ? sl : undefined;
+    const cleanTP = tp && !isNaN(tp) ? tp : undefined;
+
+    if (data.status === "CLOSED" && cleanExit) {
+      const calcs = calculateTradePnL(data.direction, entry, cleanExit, data.size);
       pnl = calcs.pnl;
       pnlPercentage = calcs.pnlPercentage;
     }
 
     addTrade({
       ...data,
-      exitPrice: data.exitPrice ?? undefined,
-      stopLoss: data.stopLoss ?? undefined,
-      takeProfit: data.takeProfit ?? undefined,
+      entryPrice: entry,
+      exitPrice: cleanExit,
+      stopLoss: cleanSL,
+      takeProfit: cleanTP,
       pnl,
       pnlPercentage,
     });
