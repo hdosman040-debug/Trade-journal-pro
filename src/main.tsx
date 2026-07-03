@@ -3,6 +3,8 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ErrorBoundary } from "./app/ErrorBoundary";
 import "./styles/globals.css";
+import eruda from "eruda";
+eruda.init();
 
 const rootEl = document.getElementById("root")!;
 
