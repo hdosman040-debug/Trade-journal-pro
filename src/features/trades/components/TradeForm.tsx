@@ -8,6 +8,17 @@ import { calculateTradePnL } from "../../../utils/tradeCalculations";
 import { Star, AlertCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
+// Safely generate local datetime-local compatible format string (YYYY-MM-DDTHH:mm)
+const getLocalDatetimeString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export function TradeForm() {
   const { playbooks, addTrade } = useJournal();
   const navigate = useNavigate();
@@ -24,7 +35,7 @@ export function TradeForm() {
     defaultValues: {
       direction: "LONG",
       status: "CLOSED",
-      date: new Date().toISOString().substring(0, 16), // Pre-fill current local timestamp
+      date: getLocalDatetimeString(), // Safe local time format preventing webview sub-string crashes
       rating: 5,
     },
   });
