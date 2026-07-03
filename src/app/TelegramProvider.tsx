@@ -30,9 +30,10 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (webApp) {
       try {
         webApp.ready();
-        webApp.expand();
-        if (typeof webApp.setHeaderColor === "function") webApp.setHeaderColor("#12141C");
-        if (typeof webApp.setBackgroundColor === "function") webApp.setBackgroundColor("#090A0F");
+        // TEMP DEBUG: expand() and theme calls disabled to isolate crash
+        // webApp.expand();
+        // if (typeof webApp.setHeaderColor === "function") webApp.setHeaderColor("#12141C");
+        // if (typeof webApp.setBackgroundColor === "function") webApp.setBackgroundColor("#090A0F");
       } catch (e) {
         console.warn("Theme parameters not set:", e);
       }
