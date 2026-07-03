@@ -52,6 +52,9 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     const authenticateAndSync = async () => {
+      // Re-verify nullability inside the inner async scope to satisfy TypeScript
+      if (!supabase) return;
+
       try {
         setSyncStatus("SYNCING");
 
