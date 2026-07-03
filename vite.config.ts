@@ -4,29 +4,18 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  // Added resolve alias for the @/ shorthand
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
   build: {
-    cssCodeSplit: true,
-    minify: "esbuild",
-    sourcemap: false,
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("lightweight-charts")) return "vendor-charts";
-            if (id.includes("framer-motion")) return "vendor-motion";
-            if (id.includes("react-router-dom") || id.includes("react-router")) return "vendor-router";
-            return "vendor-core";
-          }
-        },
-        entryFileNames: "assets/[name]-[hash].js",
-        chunkFileNames: "assets/[name]-[hash].js",
-        assetFileNames: "assets/[name]-[hash].[ext]",
+        // Appends a dynamic timestamp hash to force all browsers/Telegram to bust cache
+        entryFileNames: `assets/[name].${Date.now()}.js`,
+        chunkFileNames: `assets/[name].${Date.now()}.js`,
+        assetFileNames: `assets/[name].${Date.now()}.[ext]`,
       },
     },
   },
