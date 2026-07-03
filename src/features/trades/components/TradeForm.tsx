@@ -23,6 +23,7 @@ export function TradeForm() {
   const { playbooks, addTrade } = useJournal();
   const navigate = useNavigate();
   const [livePnL, setLivePnL] = useState<{ pnl: number; pnlPercentage: number } | null>(null);
+  const [debugError, setDebugError] = useState<string | null>(null);
 
   const {
     register,
@@ -49,15 +50,19 @@ export function TradeForm() {
 
   // Reactively calculate projected trade performance dynamically as the user types
   useEffect(() => {
-    const ep = Number(entryPrice);
-    const xp = Number(exitPrice);
-    const sz = Number(size);
+    try {
+      const ep = Number(entryPrice);
+      const xp = Number(exitPrice);
+      const sz = Number(size);
 
-    if (!isNaN(ep) && !isNaN(xp) && !isNaN(sz) && ep > 0 && xp > 0 && sz > 0) {
-      const result = calculateTradePnL(direction, ep, xp, sz);
-      setLivePnL(result);
-    } else {
-      setLivePnL(null);
+      if (!isNaN(ep) && !isNaN(xp) && !isNaN(sz) && ep > 0 && xp > 0 && sz > 0) {
+        const result = calculateTradePnL(direction, ep, xp, sz);
+        setLivePnL(result);
+      } else {
+        setLivePnL(null);
+      }
+    } catch (e: any) {
+      setDebugError(`PnL EFFECT ERROR: ${e?.message}\n${e?.stack}`);
     }
   }, [direction, entryPrice, exitPrice, size]);
 
@@ -96,6 +101,11 @@ export function TradeForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pb-8">
+      {debugError && (
+        <pre style={{ color: "red", fontSize: 10, whiteSpace: "pre-wrap", padding: 8, background: "#200", border: "1px solid red" }}>
+          {debugError}
+        </pre>
+      )}
       {/* Direction & Status Segmented Buttons */}
       <div className="grid grid-cols-2 gap-4">
         <div>
