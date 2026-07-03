@@ -5,6 +5,20 @@ import { ErrorBoundary } from "./app/ErrorBoundary";
 import "./styles/globals.css";
 import eruda from "eruda";
 eruda.init();
+// Force Eruda's entry button above app UI and to a guaranteed-visible spot
+setTimeout(() => {
+  const btn = document.querySelector("#eruda") as HTMLElement | null;
+  if (btn) {
+    btn.style.zIndex = "999999";
+  }
+  const entryBtn = document.querySelector(".eruda-entry-btn") as HTMLElement | null;
+  if (entryBtn) {
+    entryBtn.style.top = "10px";
+    entryBtn.style.bottom = "auto";
+    entryBtn.style.right = "10px";
+    entryBtn.style.zIndex = "999999";
+  }
+}, 500);
 
 const rootEl = document.getElementById("root")!;
 
