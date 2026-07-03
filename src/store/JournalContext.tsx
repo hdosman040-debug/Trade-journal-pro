@@ -4,6 +4,7 @@ import { storageService, PsychologyLog } from "../services/storage";
 import { calculateAccountMetrics, generateEquityCurve } from "../utils/tradeCalculations";
 import { supabase } from "../lib/supabaseClient";
 import { syncService } from "../services/syncService";
+import { useTelegramContext } from "../app/TelegramProvider";
 
 interface JournalContextType {
   trades: Trade[];
@@ -25,6 +26,7 @@ interface JournalContextType {
 const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { tg, isAuthenticated } = useTelegramContext();
   const [trades, setTrades] = useState<Trade[]>([]);
   const [playbooks, setPlaybooks] = useState<PlaybookSetup[]>([]);
   const [initialBalance, setInitialBalance] = useState<number>(10000);
@@ -42,7 +44,7 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setPsychologyLogs(storageService.getPsychologyLogs());
   }, []);
 
-  // 2. Authenticate user silently and initiate background syncing loops
+  // 2. Authenticate user loops (Adapts cleanly to Telegram vs Browser)
   useEffect(() => {
     if (!supabase) {
       setSyncStatus("OFFLINE");
@@ -52,12 +54,18 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const authenticateAndSync = async () => {
       try {
         setSyncStatus("SYNCING");
-        
-        // Retrieve current active session
-        if (!supabase) return;
-    let sessionUser = (await supabase.auth.getUser()).data.user;
 
-        // If no active session, execute instant silent login
+        // Strategy A: If running inside Telegram and cryptographic handshake passed
+        if (tg && isAuthenticated && tg.initDataUnsafe?.user?.id) {
+          const telegramUserId = String(tg.initDataUnsafe.user.id);
+          setUserId(telegramUserId);
+          setSyncStatus("CONNECTED");
+          return;
+        }
+
+        // Strategy B: Fallback to standard web browser anonymous session
+        let sessionUser = (await supabase.auth.getUser()).data.user;
+
         if (!sessionUser) {
           const { data, error } = await supabase.auth.signInAnonymously();
           if (error) throw error;
@@ -69,13 +77,13 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
           setSyncStatus("CONNECTED");
         }
       } catch (err) {
-        console.error("Supabase cloud authentication failed:", err);
+        console.error("Cloud synchronization mapping handshake failed:", err);
         setSyncStatus("ERROR");
       }
     };
 
     authenticateAndSync();
-  }, []);
+  }, [tg, isAuthenticated]);
 
   // 3. Synchronize cache modifications automatically
   useEffect(() => {
