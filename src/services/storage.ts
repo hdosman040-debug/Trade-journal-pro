@@ -9,10 +9,10 @@ export interface PsychologyLog {
   id: string;
   date: string;
   mood: "CALM" | "CONFIDENT" | "NEUTRAL" | "ANXIOUS" | "FRUSTRATED";
-  disciplineScore: number; // 1-10 scale
-  focusLevel: number;       // 1-10 scale
+  disciplineScore: number;
+  focusLevel: number;
   notes: string;
-  triggers: string[];       // e.g. ["FOMO", "OVERTRADING", "REVENGE_TRADING", "HESITATION"]
+  triggers: string[];
 }
 
 const DEFAULT_PLAYBOOKS: PlaybookSetup[] = [
@@ -24,7 +24,7 @@ const DEFAULT_PLAYBOOKS: PlaybookSetup[] = [
 const SEED_TRADES: Trade[] = [
   {
     id: "trade-1",
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    date: new Date().toISOString(),
     asset: "BTC/USDT",
     direction: "LONG",
     status: "CLOSED",
@@ -34,123 +34,96 @@ const SEED_TRADES: Trade[] = [
     pnl: 170.00,
     pnlPercentage: 2.72,
     playbookId: "pb-2",
-    notes: "Perfect structural breakout. High volume verification.",
+    notes: "Perfect structural breakout.",
     rating: 5,
-  },
-  {
-    id: "trade-2",
-    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    asset: "ETH/USDT",
-    direction: "SHORT",
-    status: "CLOSED",
-    entryPrice: 3450,
-    exitPrice: 3510,
-    size: 2.0,
-    pnl: -120.00,
-    pnlPercentage: -1.74,
-    playbookId: "pb-1",
-    notes: "Got squeezed at resistance. Stopped out cleanly.",
-    rating: 3,
-  },
-  {
-    id: "trade-3",
-    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    asset: "SOL/USDT",
-    direction: "LONG",
-    status: "CLOSED",
-    entryPrice: 142.50,
-    exitPrice: 151.20,
-    size: 15,
-    pnl: 130.50,
-    pnlPercentage: 6.11,
-    playbookId: "pb-3",
-    notes: "Filled the H4 FVG. Fast expansion.",
-    rating: 4,
-  },
-];
-
-const SEED_PSYCHOLOGY: PsychologyLog[] = [
-  {
-    id: "psy-1",
-    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    mood: "CONFIDENT",
-    disciplineScore: 9,
-    focusLevel: 8,
-    notes: "Traded according to rules. Handled the ETH stop-loss maturely without breaking focus.",
-    triggers: ["HESITATION"],
-  },
-  {
-    id: "psy-2",
-    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    mood: "CALM",
-    disciplineScore: 10,
-    focusLevel: 9,
-    notes: "Felt very relaxed. FVG filled perfectly, didn't move my SL or take profit early.",
-    triggers: [],
   },
 ];
 
 export const storageService = {
   getInitialBalance(): number {
-    const val = localStorage.getItem(BALANCE_KEY);
-    if (!val) {
-      localStorage.setItem(BALANCE_KEY, "10000");
+    try {
+      const val = localStorage.getItem(BALANCE_KEY);
+      if (!val) {
+        localStorage.setItem(BALANCE_KEY, "10000");
+        return 10000;
+      }
+      return parseFloat(val) || 10000;
+    } catch {
       return 10000;
     }
-    return parseFloat(val);
   },
 
   setInitialBalance(balance: number): void {
-    localStorage.setItem(BALANCE_KEY, balance.toString());
+    try {
+      localStorage.setItem(BALANCE_KEY, balance.toString());
+    } catch (e) {
+      console.error("Storage write failed", e);
+    }
   },
 
   getPlaybooks(): PlaybookSetup[] {
-    const data = localStorage.getItem(PLAYBOOKS_KEY);
-    if (!data) {
-      localStorage.setItem(PLAYBOOKS_KEY, JSON.stringify(DEFAULT_PLAYBOOKS));
+    try {
+      const data = localStorage.getItem(PLAYBOOKS_KEY);
+      if (!data) {
+        localStorage.setItem(PLAYBOOKS_KEY, JSON.stringify(DEFAULT_PLAYBOOKS));
+        return DEFAULT_PLAYBOOKS;
+      }
+      return JSON.parse(data);
+    } catch {
       return DEFAULT_PLAYBOOKS;
     }
-    return JSON.parse(data);
   },
 
   savePlaybook(playbook: PlaybookSetup): PlaybookSetup[] {
     const list = this.getPlaybooks();
     list.push(playbook);
-    localStorage.setItem(PLAYBOOKS_KEY, JSON.stringify(list));
+    try {
+      localStorage.setItem(PLAYBOOKS_KEY, JSON.stringify(list));
+    } catch (e) {
+      console.error(e);
+    }
     return list;
   },
 
   getTrades(): Trade[] {
-    const data = localStorage.getItem(TRADES_KEY);
-    if (!data) {
-      localStorage.setItem(TRADES_KEY, JSON.stringify(SEED_TRADES));
-      return SEED_TRADES;
-    }
     try {
-      return JSON.parse(data);
+      const data = localStorage.getItem(TRADES_KEY);
+      if (!data) return SEED_TRADES;
+      return JSON.parse(data) || SEED_TRADES;
     } catch {
       return SEED_TRADES;
     }
   },
 
   saveTrades(trades: Trade[]): void {
-    localStorage.setItem(TRADES_KEY, JSON.stringify(trades));
+    try {
+      // Ensure absolute data sanitization before committing to device storage
+      const serialized = JSON.stringify(trades, (_key, value) => {
+        if (typeof value === "number" && isNaN(value)) return null;
+        return value;
+      });
+      localStorage.setItem(TRADES_KEY, serialized);
+    } catch (e) {
+      console.error("Telegram LocalStorage block crash prevented:", e);
+    }
   },
 
   getPsychologyLogs(): PsychologyLog[] {
-    const data = localStorage.getItem(PSYCHOLOGY_KEY);
-    if (!data) {
-      localStorage.setItem(PSYCHOLOGY_KEY, JSON.stringify(SEED_PSYCHOLOGY));
-      return SEED_PSYCHOLOGY;
-    }
     try {
-      return JSON.parse(data);
+      const data = localStorage.getItem(PSYCHOLOGY_KEY);
+      if (!data) return [];
+      return JSON.parse(data) || [];
     } catch {
-      return SEED_PSYCHOLOGY;
+      return [];
     }
   },
 
   savePsychologyLogs(logs: PsychologyLog[]): void {
-    localStorage.setItem(PSYCHOLOGY_KEY, JSON.stringify(logs));
+    try {
+      localStorage.setItem(PSYCHOLOGY_KEY, JSON.stringify(logs));
+    } catch (e) {
+      console.error(e);
+    }
   }
 };
+// Build safe: 1783098859
