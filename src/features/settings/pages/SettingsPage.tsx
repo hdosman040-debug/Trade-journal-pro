@@ -3,7 +3,7 @@ import { useJournal } from "../../../store/JournalContext";
 import { CreatePlaybookModal } from "../../playbook/components/CreatePlaybookModal";
 import { PsychologyLogModal } from "../components/PsychologyLogModal";
 import { formatCurrency } from "../../../lib/utils";
-import { BookOpen, BrainCircuit, ShieldEllipsis, UserCheck, Plus, Trash2, Heart } from "lucide-react";
+import { BookOpen, BrainCircuit, UserCheck, Plus, Trash2, Heart } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
 export function SettingsPage() {

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Trade } from "../../../types/trade";
-import { formatCurrency } from "../../../lib/utils";
-import { ChevronLeft, ChevronRight, HelpCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../../../lib/utils";
 
 interface TradingCalendarProps {

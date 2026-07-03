@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { useJournal } from "../../../store/JournalContext";
-import { tradeSchema, TradeFormInput } from "../schemas/tradeSchema";
-import { calculateTradePnL } from "../../../utils/calculations";
+import { tradeSchema, TradeFormInput } from "../../journal/schemas/tradeSchema";
+import { calculateTradePnL } from "../../../utils/tradeCalculations";
 import { Star, AlertCircle } from "lucide-react";
 import { cn } from "../../../lib/utils";
 

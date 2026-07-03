@@ -1,10 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Trade, PlaybookSetup, AccountMetrics, EquityCurvePoint } from "../types/trade";
 import { storageService, PsychologyLog } from "../services/storage";
-import { calculateAccountMetrics, generateEquityCurve } from "../utils/calculations";
+import { calculateAccountMetrics, generateEquityCurve } from "../utils/tradeCalculations";
 import { supabase } from "../lib/supabaseClient";
 import { syncService } from "../services/syncService";
-import { CloudLightning, CloudOff } from "lucide-react";
 
 interface JournalContextType {
   trades: Trade[];
@@ -55,7 +54,8 @@ export const JournalProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setSyncStatus("SYNCING");
         
         // Retrieve current active session
-        let sessionUser = (await supabase.auth.getUser()).data.user;
+        if (!supabase) return;
+    let sessionUser = (await supabase.auth.getUser()).data.user;
 
         // If no active session, execute instant silent login
         if (!sessionUser) {
