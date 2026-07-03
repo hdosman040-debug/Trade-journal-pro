@@ -3,6 +3,9 @@ interface TelegramWebApp {
   expand(): void;
   headerColor: string;
   backgroundColor: string;
+  setHeaderColor(color: string): void;
+  setBackgroundColor(color: string): void;
+  initData: string;
   themeParams: {
     bg_color?: string;
     text_color?: string;
@@ -12,12 +15,16 @@ interface TelegramWebApp {
     button_text_color?: string;
   };
   initDataUnsafe?: {
+    query_id?: string;
+    auth_date?: string;
+    hash?: string;
     user?: {
       id: number;
       first_name: string;
       last_name?: string;
       username?: string;
       language_code?: string;
+      is_premium?: boolean;
     };
   };
   HapticFeedback: {
