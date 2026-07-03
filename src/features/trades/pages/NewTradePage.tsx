@@ -10,22 +10,25 @@ export function NewTradePage() {
 
   // Safe Top-Level React Hook Execution Context for Telegram BackButton
   useEffect(() => {
-    if (!tg) return;
+    if (!tg || !tg.BackButton) return;
 
     const backButton = tg.BackButton;
-    
-    const handleBack = () => {
-      navigate(-1);
-    };
+    const handleBack = () => navigate(-1);
 
-    // Show button and bind listener
-    backButton.show();
-    backButton.onClick(handleBack);
+    try {
+      backButton.show();
+      backButton.onClick(handleBack);
+    } catch (e) {
+      console.warn("BackButton not available on this client:", e);
+    }
 
-    // Safe teardown closure cleanup when leaving the form page
     return () => {
-      backButton.hide();
-      backButton.offClick(handleBack);
+      try {
+        backButton.hide();
+        backButton.offClick(handleBack);
+      } catch (e) {
+        console.warn("BackButton cleanup failed:", e);
+      }
     };
   }, [tg, navigate]);
 

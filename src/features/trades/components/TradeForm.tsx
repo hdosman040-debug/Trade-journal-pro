@@ -175,7 +175,8 @@ export function TradeForm() {
         <div>
           <label className="text-xs font-semibold text-foreground-muted mb-2 block">Position Size</label>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             step="any"
             placeholder="0.00"
             {...register("size", { valueAsNumber: true })}
@@ -190,7 +191,8 @@ export function TradeForm() {
         <div>
           <label className="text-xs font-semibold text-foreground-muted mb-2 block">Entry Price</label>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             step="any"
             placeholder="0.00"
             {...register("entryPrice", { valueAsNumber: true })}
@@ -204,7 +206,8 @@ export function TradeForm() {
             Exit Price
           </label>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             step="any"
             placeholder="0.00"
             disabled={status === "OPEN"}
@@ -220,7 +223,8 @@ export function TradeForm() {
         <div>
           <label className="text-xs font-semibold text-foreground-muted mb-2 block">Stop Loss (Optional)</label>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             step="any"
             placeholder="0.00"
             {...register("stopLoss", { valueAsNumber: true })}
@@ -232,7 +236,8 @@ export function TradeForm() {
         <div>
           <label className="text-xs font-semibold text-foreground-muted mb-2 block">Take Profit (Optional)</label>
           <input
-            type="number"
+            type="text"
+            inputMode="decimal"
             step="any"
             placeholder="0.00"
             {...register("takeProfit", { valueAsNumber: true })}
