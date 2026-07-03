@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { TradeForm } from "../components/TradeForm";
 import { useTelegram } from "../../../hooks/useTelegram";
@@ -5,12 +6,28 @@ import { ChevronLeft } from "lucide-react";
 
 export function NewTradePage() {
   const navigate = useNavigate();
-  const { isTelegram, setupNativeBackButton } = useTelegram();
+  const { tg, isTelegram } = useTelegram();
 
-  // Map back navigation to Telegram's native system bar BackButton
-  setupNativeBackButton(() => {
-    navigate(-1);
-  });
+  // Safe Top-Level React Hook Execution Context for Telegram BackButton
+  useEffect(() => {
+    if (!tg) return;
+
+    const backButton = tg.BackButton;
+    
+    const handleBack = () => {
+      navigate(-1);
+    };
+
+    // Show button and bind listener
+    backButton.show();
+    backButton.onClick(handleBack);
+
+    // Safe teardown closure cleanup when leaving the form page
+    return () => {
+      backButton.hide();
+      backButton.offClick(handleBack);
+    };
+  }, [tg, navigate]);
 
   return (
     <div className="space-y-4">

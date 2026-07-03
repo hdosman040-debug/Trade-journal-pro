@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useTelegramContext } from "../app/TelegramProvider";
 
 export function useTelegram() {
@@ -23,32 +22,10 @@ export function useTelegram() {
     }
   };
 
-  /**
-   * Coordinates native back navigation binding lifecycles automatically.
-   */
-  const setupNativeBackButton = (onBackAction: () => void) => {
-    useEffect(() => {
-      if (!tg) return;
-
-      const backButton = tg.BackButton;
-      
-      // Mount native overlays
-      backButton.show();
-      backButton.onClick(onBackAction);
-
-      // Unmount safely to prevent double-listener conflicts
-      return () => {
-        backButton.hide();
-        backButton.offClick(onBackAction);
-      };
-    }, [tg, onBackAction]);
-  };
-
   return {
     tg,
     isTelegram,
     username,
     triggerHaptic,
-    setupNativeBackButton,
   };
 }
