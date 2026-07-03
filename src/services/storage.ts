@@ -69,7 +69,6 @@ const SEED_TRADES: Trade[] = [
   },
 ];
 
-// Seed data representing chronological emotional performance logging
 const SEED_PSYCHOLOGY: PsychologyLog[] = [
   {
     id: "psy-1",
